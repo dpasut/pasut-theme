@@ -25,5 +25,12 @@ import "pasut-theme/src/theme.css";
 import { theme } from "pasut-theme/src/theme.js";
 ```
 
-Changes land here first; consumer sites pick them up on their next clean
-install (on Netlify: "Clear cache and deploy").
+Consumers pin a commit with an explicit https URL so CI can fetch it
+without SSH keys:
+
+```jsonc
+"pasut-theme": "git+https://github.com/dpasut/pasut-theme.git#<sha>"
+```
+
+**Bump `version` in package.json with every change** — npm will not
+refresh a cached git dependency whose version is unchanged.
