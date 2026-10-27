@@ -128,6 +128,8 @@ let make = (
   ~brand: string,
   ~brandInitial: string="C",
   ~brandIcon: option<string>=?,
+  ~markVariant: string="box", // "box" (always shown) | "avatar" (circle, collapsed only)
+
   ~active: string,
   ~nav: array<navItem>,
   ~bottom: array<navItem>=[],
@@ -185,12 +187,17 @@ let make = (
       className={collapsed ? "sidebar collapsed" : "sidebar"} style=sidebarStyle>
       <Ui.Link to_="/" className="brand">
         <>
-          <span className="brand-mark">
-            {switch brandIcon {
-            | Some(d) => <Icons.Icon d />
-            | None => React.string(brandInitial)
-            }}
-          </span>
+          {markVariant == "avatar" && !collapsed
+            ? React.null
+            : <span
+                className={markVariant == "avatar"
+                  ? "brand-mark avatar-mark"
+                  : "brand-mark"}>
+                {switch brandIcon {
+                | Some(d) => <Icons.Icon d />
+                | None => React.string(brandInitial)
+                }}
+              </span>}
           {collapsed ? React.null : React.string(brand)}
         </>
       </Ui.Link>
@@ -230,12 +237,14 @@ let make = (
       <header className="mobile-header">
         <Ui.Link to_="/" className="brand">
           <>
-            <span className="brand-mark">
-            {switch brandIcon {
-            | Some(d) => <Icons.Icon d />
-            | None => React.string(brandInitial)
-            }}
-          </span>
+            {markVariant == "avatar"
+              ? React.null
+              : <span className="brand-mark">
+                  {switch brandIcon {
+                  | Some(d) => <Icons.Icon d />
+                  | None => React.string(brandInitial)
+                  }}
+                </span>}
             {React.string(brand)}
           </>
         </Ui.Link>
