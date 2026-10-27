@@ -7,15 +7,17 @@ type navItem = {
   icon: string,
   label: string,
   isExternal: bool,
+  newTab: bool,
   trailing: option<React.element>,
 }
 
-let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~trailing=?, ()) => {
+let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~newTab=false, ~trailing=?, ()) => {
   key,
   to_,
   icon,
   label,
   isExternal,
+  newTab,
   trailing,
 }
 
@@ -54,7 +56,11 @@ module SideLink = {
       </>
     let className = active ? "side-link active" : "side-link"
     let link = item.isExternal
-      ? <a href=item.to_ className> {inner} </a>
+      ? item.newTab
+          ? <a href=item.to_ className target="_blank" rel="noopener noreferrer">
+              {inner}
+            </a>
+          : <a href=item.to_ className> {inner} </a>
       : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
     // Tooltip needs a ref-forwarding child; a plain div qualifies.
     <Mantine.Tooltip
