@@ -359,7 +359,6 @@ a.chip:hover {
   display: flex;
   gap: 4px;
   padding: 6px 8px 2px;
-  justify-content: center;
 }
 
 .sidebar.collapsed .theme-toggle {
