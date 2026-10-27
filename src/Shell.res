@@ -89,6 +89,7 @@ module BottomItem = {
 let make = (
   ~brand: string,
   ~brandInitial: string="C",
+  ~brandIcon: option<string>=?,
   ~active: string,
   ~nav: array<navItem>,
   ~bottom: array<navItem>=[],
@@ -146,7 +147,12 @@ let make = (
       className={collapsed ? "sidebar collapsed" : "sidebar"} style=sidebarStyle>
       <Ui.Link to_="/" className="brand">
         <>
-          <span className="brand-mark"> {React.string(brandInitial)} </span>
+          <span className="brand-mark">
+            {switch brandIcon {
+            | Some(d) => <Icons.Icon d />
+            | None => React.string(brandInitial)
+            }}
+          </span>
           {collapsed ? React.null : React.string(brand)}
         </>
       </Ui.Link>
@@ -185,7 +191,12 @@ let make = (
       <header className="mobile-header">
         <Ui.Link to_="/" className="brand">
           <>
-            <span className="brand-mark"> {React.string(brandInitial)} </span>
+            <span className="brand-mark">
+            {switch brandIcon {
+            | Some(d) => <Icons.Icon d />
+            | None => React.string(brandInitial)
+            }}
+          </span>
             {React.string(brand)}
           </>
         </Ui.Link>
