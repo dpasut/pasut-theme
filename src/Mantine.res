@@ -4,9 +4,20 @@ type responsiveCols = {base: int, sm: int, lg: int}
 
 module Provider = {
   @module("@mantine/core") @react.component
-  external make: (~theme: 'theme=?, ~children: React.element) => React.element =
-    "MantineProvider"
+  external make: (
+    ~theme: 'theme=?,
+    ~defaultColorScheme: string=?,
+    ~children: React.element,
+  ) => React.element = "MantineProvider"
 }
+
+type colorSchemeCtl = {
+  colorScheme: string,
+  setColorScheme: string => unit,
+}
+
+@module("@mantine/core")
+external useMantineColorScheme: unit => colorSchemeCtl = "useMantineColorScheme"
 
 module Container = {
   @module("@mantine/core") @react.component

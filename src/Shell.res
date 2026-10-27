@@ -85,6 +85,44 @@ module BottomItem = {
   }
 }
 
+module ThemeToggle = {
+  let next = s => s == "light" ? "dark" : s == "dark" ? "auto" : "light"
+  let iconFor = s => s == "light" ? Icons.sun : s == "dark" ? Icons.moon : Icons.monitor
+  let labelFor = s => s == "light" ? "Light" : s == "dark" ? "Dark" : "System"
+
+  @react.component
+  let make = (~collapsed: bool=false) => {
+    let ctl = Mantine.useMantineColorScheme()
+    let scheme = ctl.colorScheme
+    collapsed
+      ? <Mantine.Tooltip
+          label={"Theme: " ++ labelFor(scheme)} position="right" withArrow=true>
+          <div className="tip-wrap theme-toggle">
+            <button
+              className="theme-btn"
+              onClick={_ => ctl.setColorScheme(next(scheme))}
+              ariaLabel="Cycle color scheme">
+              <Icons.Icon d={iconFor(scheme)} />
+            </button>
+          </div>
+        </Mantine.Tooltip>
+      : <div className="theme-toggle" role="group" ariaLabel="Color scheme">
+          {["light", "dark", "auto"]
+          ->Js.Array2.map(s =>
+            <button
+              key=s
+              className={scheme == s ? "theme-btn active" : "theme-btn"}
+              title={labelFor(s)}
+              ariaLabel={labelFor(s)}
+              onClick={_ => ctl.setColorScheme(s)}>
+              <Icons.Icon d={iconFor(s)} />
+            </button>
+          )
+          ->React.array}
+        </div>
+  }
+}
+
 @react.component
 let make = (
   ~brand: string,
@@ -169,6 +207,7 @@ let make = (
           <SideLink key=i.key item=i active={active == i.key} collapsed />
         )
         ->React.array}
+        <ThemeToggle collapsed />
       </div>
       <button
         className="edge-toggle"
@@ -200,6 +239,7 @@ let make = (
             {React.string(brand)}
           </>
         </Ui.Link>
+        <div className="mh-toggle"> <ThemeToggle /> </div>
       </header>
       <Mantine.Container size="xl" px="md">
         <div className="page"> {children} </div>

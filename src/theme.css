@@ -353,3 +353,84 @@ a.chip:hover {
   height: 16px;
   display: block;
 }
+
+/* ---- Color scheme toggle ---- */
+.theme-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px 2px;
+}
+
+.sidebar.collapsed .theme-toggle {
+  justify-content: center;
+  padding: 6px 0 2px;
+}
+
+.theme-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--dimmed);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.theme-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.theme-btn.active {
+  background: var(--p-0);
+  color: var(--p-7);
+}
+
+.theme-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mh-toggle {
+  margin-left: auto;
+}
+
+/* ---- Dark scheme tokens ---- */
+[data-mantine-color-scheme="dark"] {
+  --bg: #15181b;
+  --surface: #1d2126;
+  --surface-2: #262b31;
+  --border: #32383f;
+  --border-strong: #434a52;
+  --text: #e7e9ec;
+  --dimmed: #9aa1a9;
+  --p-0: #20334f;
+  --p-1: #2a4568;
+  --p-6: #3a6bb9;
+  --p-7: #8fb3e4;
+  --p-8: #b9d0ef;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Print always uses the light palette, whatever the screen scheme */
+@media print {
+  :root,
+  [data-mantine-color-scheme="dark"] {
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --surface-2: #f1f3f5;
+    --border: #dee2e6;
+    --border-strong: #ced4da;
+    --text: #1f2326;
+    --dimmed: #5c636a;
+    --p-0: #e9eef9;
+    --p-1: #d1ddf1;
+    --p-6: #25529a;
+    --p-7: #153f7a;
+    --p-8: #0c294c;
+  }
+}
