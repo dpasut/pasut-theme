@@ -11,6 +11,21 @@ export const theme = createTheme({
   primaryColor: "navy",
   primaryShade: 7,
   colors: {
+    // Mantine's default dark scale is a warm gray that reads brown next to
+    // the site's cool surfaces; use a cool ramp aligned with the CSS tokens
+    // (inputs pick up index 6 = the sidebar surface color).
+    dark: [
+      "#e7e9ec",
+      "#c9cdd2",
+      "#9aa1a9",
+      "#6a7178",
+      "#434a52",
+      "#32383f",
+      "#1d2126",
+      "#1d2126",
+      "#15181b",
+      "#0d1013",
+    ],
     navy: [
       "#e9eef9",
       "#d1ddf1",
