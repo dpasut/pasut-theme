@@ -6,16 +6,16 @@ type navItem = {
   to_: string,
   icon: string,
   label: string,
-  external: bool,
+  isExternal: bool,
   trailing: option<React.element>,
 }
 
-let item = (~key, ~to_, ~icon, ~label, ~external=false, ~trailing=?, ()) => {
+let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~trailing=?, ()) => {
   key,
   to_,
   icon,
   label,
-  external,
+  isExternal,
   trailing,
 }
 
@@ -53,7 +53,7 @@ module SideLink = {
             }}
       </>
     let className = active ? "side-link active" : "side-link"
-    let link = item.external
+    let link = item.isExternal
       ? <a href=item.to_ className> {inner} </a>
       : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
     // Tooltip needs a ref-forwarding child; a plain div qualifies.
@@ -73,7 +73,7 @@ module BottomItem = {
         <span className="bn-icon"> <Icons.Icon d=item.icon /> </span>
         {React.string(item.label)}
       </>
-    item.external
+    item.isExternal
       ? <a href=item.to_ className> {inner} </a>
       : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
   }
