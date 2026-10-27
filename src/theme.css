@@ -347,3 +347,9 @@ a.chip:hover {
     padding: 0;
   }
 }
+
+.brand-mark svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}

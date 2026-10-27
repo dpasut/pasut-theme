@@ -1,6 +1,6 @@
 {
   "name": "pasut-theme",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Shared design system for pasut.xyz sites: tokens, Mantine theme, sidebar shell, icons",
   "type": "module",
   "peerDependencies": {
