@@ -214,8 +214,9 @@ body {
   padding: 24px 0 96px;
 }
 
-/* ---- Mobile: hide sidebar, show top bar + bottom nav ---- */
-.bottom-nav {
+/* ---- Mobile: hide sidebar, show top bar + full-screen menu ---- */
+.mobile-menu,
+.mh-burger {
   display: none;
 }
 
@@ -240,39 +241,82 @@ body {
     padding: 4px 8px;
   }
 
-  .bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 100;
-    height: 64px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+  .mh-burger {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    border: none;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 0;
   }
 
-  .bn-item {
+  .mh-burger:hover {
+    background: var(--surface-2);
+  }
+
+  .mobile-menu.open {
     display: flex;
     flex-direction: column;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--surface);
+  }
+
+  .mm-head {
+    display: flex;
     align-items: center;
-    justify-content: center;
+    height: 56px;
+    flex: none;
+    padding: 0 8px 0 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mm-head .brand {
+    padding: 0;
+  }
+
+  .mm-nav {
+    display: flex;
+    flex-direction: column;
     gap: 2px;
-    font-size: 11px;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .mm-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
     font-weight: 500;
-    color: var(--dimmed);
     text-decoration: none;
   }
 
-  .bn-item.active {
+  .mm-item.active {
+    background: var(--p-0);
     color: var(--p-7);
   }
 
-  .bn-icon {
-    font-size: 20px;
-    line-height: 1;
+  .mm-bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 12px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .mm-bottom .theme-toggle {
+    padding: 10px 12px 2px;
   }
 }
 
@@ -392,10 +436,6 @@ a.chip:hover {
 .theme-btn svg {
   width: 16px;
   height: 16px;
-}
-
-.mh-toggle {
-  margin-left: auto;
 }
 
 /* ---- Dark scheme tokens ---- */

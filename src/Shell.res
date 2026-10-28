@@ -70,18 +70,39 @@ module SideLink = {
   }
 }
 
-module BottomItem = {
+module MenuItem = {
   @react.component
-  let make = (~item: navItem, ~active: bool) => {
-    let className = active ? "bn-item active" : "bn-item"
+  let make = (~item: navItem, ~active: bool, ~onNavigate: unit => unit) => {
+    let className = active ? "mm-item active" : "mm-item"
     let inner =
       <>
-        <span className="bn-icon"> <Icons.Icon d=item.icon /> </span>
-        {React.string(item.label)}
+        <Icons.Icon d=item.icon className="side-icon" />
+        <span className="side-label"> {React.string(item.label)} </span>
+        {switch item.trailing {
+        | Some(t) => t
+        | None => React.null
+        }}
       </>
     item.isExternal
-      ? <a href=item.to_ className> {inner} </a>
-      : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
+      ? <a
+          href=item.to_
+          className
+          target={item.newTab ? "_blank" : "_self"}
+          rel={item.newTab ? "noopener noreferrer" : ""}
+          onClick={_ => onNavigate()}>
+          {inner}
+        </a>
+      : <a
+          href=item.to_
+          className
+          onClick={e => {
+            ReactEvent.Mouse.preventDefault(e)
+            RescriptReactRouter.push(item.to_)
+            Ui.scrollTop()
+            onNavigate()
+          }}>
+          {inner}
+        </a>
   }
 }
 
@@ -133,7 +154,6 @@ let make = (
   ~active: string,
   ~nav: array<navItem>,
   ~bottom: array<navItem>=[],
-  ~mobileNav: array<navItem>=[],
   ~children,
 ) => {
   let (collapsed, setCollapsed) = React.useState(() =>
@@ -146,6 +166,7 @@ let make = (
     ->Belt.Option.mapWithDefault(248., clamp)
   )
   let dragging = React.useRef(false)
+  let (menuOpen, setMenuOpen) = React.useState(() => false)
 
   React.useEffect0(() => {
     let onMove = e =>
@@ -179,8 +200,6 @@ let make = (
   let sidebarStyle = collapsed
     ? ReactDOM.Style.make(~width="64px", ())
     : ReactDOM.Style.make(~width=Belt.Float.toString(width) ++ "px", ())
-
-  let mobile = mobileNav->Js.Array2.length > 0 ? mobileNav : nav
 
   <div className="shell">
     <aside
@@ -248,18 +267,52 @@ let make = (
             {React.string(brand)}
           </>
         </Ui.Link>
-        <div className="mh-toggle"> <ThemeToggle /> </div>
+        <button
+          className="mh-burger"
+          onClick={_ => setMenuOpen(_ => true)}
+          ariaLabel="Open menu">
+          <Icons.Icon d=Icons.menu />
+        </button>
       </header>
       <Mantine.Container size="xl" px="md">
         <div className="page"> {children} </div>
       </Mantine.Container>
     </div>
-    <nav className="bottom-nav">
-      {mobile
-      ->Js.Array2.map(i =>
-        <BottomItem key=i.key item=i active={active == i.key} />
-      )
-      ->React.array}
-    </nav>
+    <div className={menuOpen ? "mobile-menu open" : "mobile-menu"}>
+      <div className="mm-head">
+        <span className="brand"> {React.string(brand)} </span>
+        <button
+          className="mh-burger"
+          onClick={_ => setMenuOpen(_ => false)}
+          ariaLabel="Close menu">
+          <Icons.Icon d=Icons.close />
+        </button>
+      </div>
+      <nav className="mm-nav">
+        {nav
+        ->Js.Array2.map(i =>
+          <MenuItem
+            key=i.key
+            item=i
+            active={active == i.key}
+            onNavigate={() => setMenuOpen(_ => false)}
+          />
+        )
+        ->React.array}
+      </nav>
+      <div className="mm-bottom">
+        {bottom
+        ->Js.Array2.map(i =>
+          <MenuItem
+            key=i.key
+            item=i
+            active={active == i.key}
+            onNavigate={() => setMenuOpen(_ => false)}
+          />
+        )
+        ->React.array}
+        <ThemeToggle />
+      </div>
+    </div>
   </div>
 }
