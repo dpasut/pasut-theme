@@ -364,6 +364,19 @@ body {
   }
 }
 
+/* ---- Links in page content: the site's colour (light and dark), a soft underline. :where() keeps this
+   below any class rule, so styled links (buttons, chips, ...) keep their own look. */
+:where(.page) a {
+  color: var(--p-7);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--p-7) 40%, transparent);
+  text-underline-offset: 2px;
+}
+
+:where(.page) a:hover {
+  text-decoration-color: currentColor;
+}
+
 /* ---- Page headings ---- */
 .page-title {
   font-family: var(--font-display);
