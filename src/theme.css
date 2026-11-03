@@ -19,6 +19,25 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
+/* Always keep room for the page's scrollbar, so the layout doesn't shift sideways when a page gets taller
+   or shorter than the window (e.g. switching tabs). overflow-y: scroll is what reliably does it for the page
+   itself (short pages show an empty track where scrollbars take up space; overlay scrollbars show nothing). */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* While a dialog locks scrolling (Mantine marks the body with data-scroll-locked), hide the page's scrollbar
+   so the page behind can't scroll; scrollbar-gutter keeps its space, so the library's usual compensation
+   (a margin the width of the scrollbar) isn't needed and would shift the page. */
+html:has(body[data-scroll-locked]) {
+  overflow-y: hidden;
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 html,
 body {
   margin: 0;
