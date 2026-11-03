@@ -1,5 +1,7 @@
 // Shared app shell: resizable, collapsible sidebar on desktop; top bar +
-// bottom nav on phones. Each site supplies its brand and nav items.
+// full-screen menu on phones. Each site supplies its brand and nav items,
+// either as flat lists (`nav`, `bottom`) or grouped into sections
+// (`sections`, `bottomSections`).
 
 type navItem = {
   key: string,
@@ -20,6 +22,13 @@ let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~newTab=false, ~traili
   newTab,
   trailing,
 }
+
+// A group of nav items. Every section after the first in its list starts with
+// a thin divider and, if it has one, a small uppercase label ("LIVE TV").
+// When the sidebar is collapsed the divider stays and the label is hidden.
+type section = {key: string, label: option<string>, items: array<navItem>}
+
+let section = (~key, ~label=?, ~items, ()) => {key, label, items}
 
 @val @scope(("window", "localStorage"))
 external storageGet: string => Js.Nullable.t<string> = "getItem"
@@ -116,6 +125,64 @@ module MenuItem = {
   }
 }
 
+module SectionHead = {
+  @react.component
+  let make = (~label: option<string>, ~collapsed: bool) =>
+    <div className="nav-section" role="presentation">
+      <div className="nav-divider" />
+      {switch (label, collapsed) {
+      | (Some(l), false) =>
+        <div className="nav-section-label"> {React.string(l)} </div>
+      | _ => React.null
+      }}
+    </div>
+}
+
+module SideSections = {
+  @react.component
+  let make = (~sections: array<section>, ~active: string, ~collapsed: bool) =>
+    sections
+    ->Js.Array2.mapi((s, i) =>
+      <React.Fragment key=s.key>
+        {i > 0 ? <SectionHead label=s.label collapsed /> : React.null}
+        {s.items
+        ->Js.Array2.map(it =>
+          <SideLink key=it.key item=it active={active == it.key} collapsed />
+        )
+        ->React.array}
+      </React.Fragment>
+    )
+    ->React.array
+}
+
+module MenuSections = {
+  @react.component
+  let make = (
+    ~sections: array<section>,
+    ~active: string,
+    ~onNavigate: unit => unit,
+  ) =>
+    sections
+    ->Js.Array2.mapi((s, i) =>
+      <React.Fragment key=s.key>
+        {i > 0 ? <SectionHead label=s.label collapsed=false /> : React.null}
+        {s.items
+        ->Js.Array2.map(it =>
+          <MenuItem key=it.key item=it active={active == it.key} onNavigate />
+        )
+        ->React.array}
+      </React.Fragment>
+    )
+    ->React.array
+}
+
+// The flat lists as a single unlabelled section, unless sections were given.
+let sectionsOr = (sections: option<array<section>>, items: array<navItem>, key) =>
+  switch sections {
+  | Some(s) => s
+  | None => [{key, label: None, items}]
+  }
+
 module ThemeToggle = {
   let next = s => s == "light" ? "dark" : s == "dark" ? "auto" : "light"
   let iconFor = s => s == "light" ? Icons.sun : s == "dark" ? Icons.moon : Icons.monitor
@@ -162,10 +229,15 @@ let make = (
   ~markVariant: string="box", // "box" (always shown) | "avatar" (circle, collapsed only)
 
   ~active: string,
-  ~nav: array<navItem>,
+  ~nav: array<navItem>=[],
   ~bottom: array<navItem>=[],
+  // grouped alternatives to `nav` / `bottom`; when given, they replace them
+  ~sections: option<array<section>>=?,
+  ~bottomSections: option<array<section>>=?,
   ~children,
 ) => {
+  let top = sectionsOr(sections, nav, "nav")
+  let foot = sectionsOr(bottomSections, bottom, "bottom")
   let (collapsed, setCollapsed) = React.useState(() =>
     lsGet("sidebar-collapsed")->Js.Nullable.toOption == Some("1")
   )
@@ -177,6 +249,7 @@ let make = (
   )
   let dragging = React.useRef(false)
   let (menuOpen, setMenuOpen) = React.useState(() => false)
+  let closeMenu = () => setMenuOpen(_ => false)
 
   React.useEffect0(() => {
     let onMove = e =>
@@ -231,18 +304,10 @@ let make = (
         </>
       </Ui.Link>
       <nav className="side-nav">
-        {nav
-        ->Js.Array2.map(i =>
-          <SideLink key=i.key item=i active={active == i.key} collapsed />
-        )
-        ->React.array}
+        <SideSections sections=top active collapsed />
       </nav>
       <div className="side-bottom">
-        {bottom
-        ->Js.Array2.map(i =>
-          <SideLink key=i.key item=i active={active == i.key} collapsed />
-        )
-        ->React.array}
+        <SideSections sections=foot active collapsed />
         <ThemeToggle collapsed />
       </div>
       <button
@@ -299,28 +364,10 @@ let make = (
         </button>
       </div>
       <nav className="mm-nav">
-        {nav
-        ->Js.Array2.map(i =>
-          <MenuItem
-            key=i.key
-            item=i
-            active={active == i.key}
-            onNavigate={() => setMenuOpen(_ => false)}
-          />
-        )
-        ->React.array}
+        <MenuSections sections=top active onNavigate=closeMenu />
       </nav>
       <div className="mm-bottom">
-        {bottom
-        ->Js.Array2.map(i =>
-          <MenuItem
-            key=i.key
-            item=i
-            active={active == i.key}
-            onNavigate={() => setMenuOpen(_ => false)}
-          />
-        )
-        ->React.array}
+        <MenuSections sections=foot active onNavigate=closeMenu />
         <ThemeToggle />
       </div>
     </div>

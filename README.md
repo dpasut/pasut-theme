@@ -25,6 +25,36 @@ import "pasut-theme/src/theme.css";
 import { theme } from "pasut-theme/src/theme.js";
 ```
 
+### The sidebar
+
+```rescript
+module Shell = PasutTheme.Shell
+
+// flat: one list at the top, one pinned to the bottom (above the theme switcher)
+<Shell brand="Recipes" active nav=[Shell.item(~key="home", ~to_="/", ~icon, ~label="Home", ())]>
+  ...
+</Shell>
+
+// sections: every section after the first starts with a thin divider and, if
+// labelled, a small uppercase heading; collapsed, only the divider shows
+let sections = [
+  Shell.section(~key="home", ~items=[overview], ()),
+  Shell.section(~key="live", ~label="Live TV", ~items=[channels, playlists], ()),
+]
+<Shell brand="IPTV Guide" active sections bottomSections=[Shell.section(~key="admin", ~items=[logs, manage], ())]>
+  ...
+</Shell>
+```
+
+`sections` / `bottomSections` replace `nav` / `bottom` when given; sites using
+the flat lists are unaffected. The phone menu shows the same sections.
+
+### Installed web apps
+
+The shell keeps clear of the notch and home indicator when a site is drawn edge
+to edge (`viewport-fit=cover` in its viewport meta, e.g. an installed PWA). The
+safe-area insets are 0 everywhere else, so nothing changes for normal sites.
+
 Consumers pin a commit with an explicit https URL so CI can fetch it
 without SSH keys:
 
