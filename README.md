@@ -79,6 +79,20 @@ without SSH keys:
 **Bump `version` in package.json with every change** — npm will not
 refresh a cached git dependency whose version is unchanged.
 
+### Accent colour
+
+`src/accent.js` lets a site use any accent colour instead of the navy:
+
+```js
+import { applyAccent, themeWithAccent, accentPalette, contrastOnWhite, DEFAULT_ACCENT } from "pasut-theme/src/accent.js";
+
+applyAccent("#2f9e44");                       // the CSS tokens (--p-*), light and dark; null = back to navy
+<MantineProvider theme={themeWithAccent(theme, "#2f9e44")}>  // Mantine's primary palette, auto contrast
+```
+
+The 10 shades keep the colour's hue and saturation and step the lightness like the designed navy palette, so
+the default comes out the same. `contrastOnWhite(hex)` is the WCAG ratio for text in that colour on white.
+
 ## Linting
 
 This package follows the same three lint rules as its consumer sites.
