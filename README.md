@@ -57,6 +57,9 @@ a theme row (`<icon> Theme: Light / Dark / System`, a click moves to the next) a
 the separate theme switcher and `footerItem`; whether it's open is remembered. Collapsed, it's the avatar and
 icon rows with tooltips.
 
+`Shell.item(..., ~disabled=true, ())` shows an item greyed out and not clickable (e.g. a page that's coming
+soon).
+
 `sections` / `bottomSections` replace `nav` / `bottom` when given; sites using
 the flat lists are unaffected. The phone menu shows the same sections.
 

@@ -114,6 +114,18 @@ body {
   background: var(--surface-2);
 }
 
+/* an item that isn't available yet: greyed out, not clickable */
+.side-link.disabled,
+.mm-item.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.side-link.disabled:hover,
+.mm-item.disabled:hover {
+  background: none;
+}
+
 .side-link.active {
   background: var(--p-0);
   color: var(--p-7);

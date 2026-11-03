@@ -11,9 +11,20 @@ type navItem = {
   isExternal: bool,
   newTab: bool,
   trailing: option<React.element>,
+  disabled: bool, // shown greyed out, not a link (e.g. a page that's coming soon)
 }
 
-let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~newTab=false, ~trailing=?, ()) => {
+let item = (
+  ~key,
+  ~to_,
+  ~icon,
+  ~label,
+  ~isExternal=false,
+  ~newTab=false,
+  ~trailing=?,
+  ~disabled=false,
+  (),
+) => {
   key,
   to_,
   icon,
@@ -21,6 +32,7 @@ let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~newTab=false, ~traili
   isExternal,
   newTab,
   trailing,
+  disabled,
 }
 
 // A group of nav items. Every section after the first in its list starts with
@@ -91,7 +103,9 @@ module SideLink = {
             }}
       </>
     let className = active ? "side-link active" : "side-link"
-    let link = item.isExternal
+    let link = item.disabled
+      ? <span className="side-link disabled" ariaDisabled=true> {inner} </span>
+      : item.isExternal
       ? item.newTab
           ? <a href=item.to_ className target="_blank" rel="noopener noreferrer">
               {inner}
@@ -119,7 +133,9 @@ module MenuItem = {
         | None => React.null
         }}
       </>
-    item.isExternal
+    item.disabled
+      ? <span className="mm-item disabled" ariaDisabled=true> {inner} </span>
+      : item.isExternal
       ? <a
           href=item.to_
           className
