@@ -47,7 +47,7 @@ module TextInput = {
     ~radius: string=?,
     ~leftSection: React.element=?,
     ~rightSection: React.element=?,
-    ~ariaLabel: string=?,
+    @as("aria-label") ~ariaLabel: string=?,
   ) => React.element = "TextInput"
 }
 
@@ -94,7 +94,7 @@ module CloseButton = {
   @module("@mantine/core") @react.component
   external make: (
     ~onClick: ReactEvent.Mouse.t => unit=?,
-    ~ariaLabel: string=?,
+    @as("aria-label") ~ariaLabel: string=?,
   ) => React.element = "CloseButton"
 }
 
