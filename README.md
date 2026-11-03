@@ -52,7 +52,7 @@ if there's room) to the right of the theme switcher, e.g.
 Collapsed, it's an icon under the switcher; the phone menu shows it beside the switcher.
 
 `account` puts the signed-in account at the very bottom: `<avatar> <name>`, which opens (upwards) to its items,
-a theme row (`<icon> Light / Dark / System`, a click moves to the next) and its `endItems`, e.g.
+a theme row (`<icon> Theme: Light / Dark / System`, a click moves to the next) and its `endItems`, e.g.
 `Shell.account(~name="admin", ~items=[logs, manage, settings, changes], ~endItems=[signOut], ())`. It replaces
 the separate theme switcher and `footerItem`; whether it's open is remembered. Collapsed, it's the avatar and
 icon rows with tooltips.

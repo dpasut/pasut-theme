@@ -281,7 +281,7 @@ module ThemeToggle = {
   }
 }
 
-// The theme as one row: its icon and name; a click moves on to the next (Light → Dark → System).
+// The theme as one row: its icon and "Theme: <name>"; a click moves on to the next (Light → Dark → System).
 module ThemeCycle = {
   @react.component
   let make = (~collapsed: bool, ~mobile: bool=false) => {
@@ -294,7 +294,7 @@ module ThemeCycle = {
         onClick={_ => ctl.setColorScheme(ThemeToggle.next(scheme))}
         ariaLabel={"Theme: " ++ label ++ " (click to change)"}>
         <Icons.Icon d={ThemeToggle.iconFor(scheme)} className="side-icon" />
-        {collapsed ? React.null : <span className="side-label"> {React.string(label)} </span>}
+        {collapsed ? React.null : <span className="side-label"> {React.string("Theme: " ++ label)} </span>}
       </button>
     <Mantine.Tooltip label={"Theme: " ++ label} position="right" withArrow=true disabled={!collapsed}>
       <div className="tip-wrap"> {button} </div>
