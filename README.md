@@ -51,6 +51,12 @@ if there's room) to the right of the theme switcher, e.g.
 `footerItem=Shell.item(~key="updates", ~to_="/updates", ~icon=Icons.sparkles, ~label="Changes", ())`.
 Collapsed, it's an icon under the switcher; the phone menu shows it beside the switcher.
 
+`account` puts the signed-in account at the very bottom: `<avatar> <name>`, which opens (upwards) to its items,
+a theme row (`<icon> Light / Dark / System`, a click moves to the next) and its `endItems`, e.g.
+`Shell.account(~name="admin", ~items=[logs, manage, settings, changes], ~endItems=[signOut], ())`. It replaces
+the separate theme switcher and `footerItem`; whether it's open is remembered. Collapsed, it's the avatar and
+icon rows with tooltips.
+
 `sections` / `bottomSections` replace `nav` / `bottom` when given; sites using
 the flat lists are unaffected. The phone menu shows the same sections.
 

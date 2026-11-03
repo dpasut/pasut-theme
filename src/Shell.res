@@ -30,6 +30,23 @@ type section = {key: string, label: option<string>, items: array<navItem>}
 
 let section = (~key, ~label=?, ~items, ()) => {key, label, items}
 
+// The signed-in account at the foot of the sidebar: "<avatar> <name>", which opens to show `items`, a theme
+// row (Light / Dark / System, click to cycle), then `endItems` (e.g. Sign out). It replaces the separate
+// theme switcher and footer link.
+type account = {name: string, items: array<navItem>, endItems: array<navItem>}
+
+let account = (~name, ~items, ~endItems=[], ()) => {name, items, endItems}
+
+let initials = (name: string) => {
+  let words = name->Js.String2.trim->Js.String2.splitByRe(%re("/[\s._@-]+/"))->Belt.Array.keepMap(w => w)
+  let first = w => w->Js.String2.slice(~from=0, ~to_=1)->Js.String2.toUpperCase
+  switch (words->Belt.Array.get(0), words->Belt.Array.get(Js.Array2.length(words) - 1)) {
+  | (Some(a), Some(b)) if Js.Array2.length(words) > 1 => first(a) ++ first(b)
+  | (Some(a), _) => first(a)
+  | _ => "?"
+  }
+}
+
 @val @scope(("window", "localStorage"))
 external storageGet: string => Js.Nullable.t<string> = "getItem"
 @val @scope(("window", "localStorage"))
@@ -264,6 +281,80 @@ module ThemeToggle = {
   }
 }
 
+// The theme as one row: its icon and name; a click moves on to the next (Light → Dark → System).
+module ThemeCycle = {
+  @react.component
+  let make = (~collapsed: bool, ~mobile: bool=false) => {
+    let ctl = Mantine.useMantineColorScheme()
+    let scheme = ctl.colorScheme
+    let label = ThemeToggle.labelFor(scheme)
+    let button =
+      <button
+        className={mobile ? "mm-item theme-cycle" : "side-link theme-cycle"}
+        onClick={_ => ctl.setColorScheme(ThemeToggle.next(scheme))}
+        ariaLabel={"Theme: " ++ label ++ " (click to change)"}>
+        <Icons.Icon d={ThemeToggle.iconFor(scheme)} className="side-icon" />
+        {collapsed ? React.null : <span className="side-label"> {React.string(label)} </span>}
+      </button>
+    <Mantine.Tooltip label={"Theme: " ++ label} position="right" withArrow=true disabled={!collapsed}>
+      <div className="tip-wrap"> {button} </div>
+    </Mantine.Tooltip>
+  }
+}
+
+module AccountMenu = {
+  @react.component
+  let make = (
+    ~account: account,
+    ~active: string,
+    ~collapsed: bool,
+    ~onNavigate: option<unit => unit>=?,
+  ) => {
+    let (open_, setOpen) = React.useState(() =>
+      lsGet("sidebar-account-open")->Js.Nullable.toOption == Some("1")
+    )
+    let toggle = _ =>
+      setOpen(o => {
+        lsSet("sidebar-account-open", !o ? "1" : "0")
+        !o
+      })
+    let all = Js.Array2.concat(account.items, account.endItems)
+    let inside = all->Js.Array2.some(it => it.key == active)
+    let row = (it: navItem) =>
+      switch onNavigate {
+      | Some(close) =>
+        <MenuItem key=it.key item=it active={active == it.key} onNavigate=close />
+      | None => <SideLink key=it.key item=it active={active == it.key} collapsed />
+      }
+    let head =
+      <button
+        className={"account-head" ++ (open_ ? " open" : "") ++ (inside && !open_ ? " has-active" : "")}
+        onClick=toggle
+        ariaExpanded=open_
+        ariaLabel={account.name ++ (open_ ? ": close menu" : ": open menu")}>
+        <span className="account-avatar"> {React.string(initials(account.name))} </span>
+        {collapsed
+          ? React.null
+          : <>
+              <span className="side-label account-name"> {React.string(account.name)} </span>
+              <Icons.Icon d={open_ ? Icons.chevronDown : Icons.chevronUp} className="account-chevron" />
+            </>}
+      </button>
+    <div className="account">
+      {open_
+        ? <div className="account-items">
+            {account.items->Js.Array2.map(row)->React.array}
+            <ThemeCycle collapsed mobile={onNavigate != None} />
+            {account.endItems->Js.Array2.map(row)->React.array}
+          </div>
+        : React.null}
+      <Mantine.Tooltip label=account.name position="right" withArrow=true disabled={!collapsed}>
+        <div className="tip-wrap"> {head} </div>
+      </Mantine.Tooltip>
+    </div>
+  }
+}
+
 @react.component
 let make = (
   ~brand: string,
@@ -279,6 +370,8 @@ let make = (
   ~bottomSections: option<array<section>>=?,
   // a compact link to the right of the theme switcher (below it while collapsed)
   ~footerItem: option<navItem>=?,
+  // the signed-in account's menu, at the very bottom (replaces the theme switcher and footer link)
+  ~account: option<account>=?,
   ~children,
 ) => {
   let top = sectionsOr(sections, nav, "nav")
@@ -353,13 +446,17 @@ let make = (
       </nav>
       <div className="side-bottom">
         <SideSections sections=foot active collapsed />
-        <div className="side-footer">
-          <ThemeToggle collapsed />
-          {switch footerItem {
-          | Some(it) => <FooterLink item=it active={active == it.key} collapsed />
-          | None => React.null
-          }}
-        </div>
+        {switch account {
+        | Some(a) => <AccountMenu account=a active collapsed />
+        | None =>
+          <div className="side-footer">
+            <ThemeToggle collapsed />
+            {switch footerItem {
+            | Some(it) => <FooterLink item=it active={active == it.key} collapsed />
+            | None => React.null
+            }}
+          </div>
+        }}
       </div>
       <button
         className="edge-toggle"
@@ -419,14 +516,18 @@ let make = (
       </nav>
       <div className="mm-bottom">
         <MenuSections sections=foot active onNavigate=closeMenu />
-        <div className="side-footer">
-          <ThemeToggle />
-          {switch footerItem {
-          | Some(it) =>
-            <FooterLink item=it active={active == it.key} collapsed=false onNavigate=closeMenu />
-          | None => React.null
-          }}
-        </div>
+        {switch account {
+        | Some(a) => <AccountMenu account=a active collapsed=false onNavigate=closeMenu />
+        | None =>
+          <div className="side-footer">
+            <ThemeToggle />
+            {switch footerItem {
+            | Some(it) =>
+              <FooterLink item=it active={active == it.key} collapsed=false onNavigate=closeMenu />
+            | None => React.null
+            }}
+          </div>
+        }}
       </div>
     </div>
   </div>

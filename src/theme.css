@@ -471,6 +471,100 @@ a.chip:hover {
   padding: 6px 0 2px;
 }
 
+/* The account menu at the foot of the sidebar: "<avatar> <name>", opening upwards. */
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.account-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-head:hover,
+.account-head.open {
+  background: var(--surface-2);
+}
+
+.account-head.has-active .account-avatar {
+  box-shadow: 0 0 0 2px var(--p-2, var(--p-0));
+}
+
+.sidebar.collapsed .account-head {
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.account-avatar {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--p-6);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.account-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-chevron {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  color: var(--dimmed);
+  flex-shrink: 0;
+}
+
+/* the theme row is a button styled like the links around it */
+.theme-cycle {
+  width: 100%;
+  border: 0;
+  background: none;
+  font-family: inherit;  /* size and weight come from .side-link / .mm-item */
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-cycle:hover {
+  background: var(--surface-2);
+}
+
+.mm-bottom .account {
+  padding: 8px 0 0;
+}
+
 /* The theme switcher's row, with an optional compact link to its right
    (stacked under it while the sidebar is collapsed). */
 .side-footer {
