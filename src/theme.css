@@ -561,8 +561,10 @@ a.chip:hover {
   background: var(--surface-2);
 }
 
+/* the phone menu's bottom area already has a line along its top */
 .mm-bottom .account {
-  padding: 8px 0 0;
+  border-top: 0;
+  padding: 0;
 }
 
 /* The theme switcher's row, with an optional compact link to its right
