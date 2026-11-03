@@ -346,6 +346,10 @@ body {
   .mm-bottom .theme-toggle {
     padding: 10px 12px 2px;
   }
+
+  .mm-bottom .footer-link {
+    margin: 8px 12px 0 0;
+  }
 }
 
 /* ---- Page headings ---- */
@@ -465,6 +469,56 @@ a.chip:hover {
 .sidebar.collapsed .theme-toggle {
   justify-content: center;
   padding: 6px 0 2px;
+}
+
+/* The theme switcher's row, with an optional compact link to its right
+   (stacked under it while the sidebar is collapsed). */
+.side-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.sidebar.collapsed .side-footer {
+  flex-direction: column;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--dimmed);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.footer-link.active {
+  background: var(--p-0);
+  color: var(--p-7);
+}
+
+.footer-link svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.sidebar.collapsed .footer-link {
+  padding: 0;
+  width: 30px;
+  justify-content: center;
 }
 
 .theme-btn {

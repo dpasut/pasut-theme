@@ -176,6 +176,49 @@ module MenuSections = {
     ->React.array
 }
 
+// A compact link beside the theme switcher (e.g. "Changes"): icon and label, or just the icon (with a
+// tooltip) while collapsed, plus the item's `trailing` element (e.g. a version badge) when expanded.
+module FooterLink = {
+  @react.component
+  let make = (~item: navItem, ~active: bool, ~collapsed: bool, ~onNavigate: option<unit => unit>=?) => {
+    let className = active ? "footer-link active" : "footer-link"
+    let inner =
+      <>
+        <Icons.Icon d=item.icon />
+        {collapsed ? React.null : <span> {React.string(item.label)} </span>}
+        {switch (collapsed, item.trailing) {
+        | (false, Some(t)) => t
+        | _ => React.null
+        }}
+      </>
+    let link = switch onNavigate {
+    | Some(close) =>
+      // the phone menu: navigate, then close the menu
+      <a
+        href=item.to_
+        className
+        title=item.label
+        onClick={e => {
+          if !item.isExternal {
+            ReactEvent.Mouse.preventDefault(e)
+            RescriptReactRouter.push(item.to_)
+            Ui.scrollTop()
+          }
+          close()
+        }}>
+        {inner}
+      </a>
+    | None =>
+      item.isExternal
+        ? <a href=item.to_ className title=item.label> {inner} </a>
+        : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
+    }
+    <Mantine.Tooltip label=item.label position="right" withArrow=true disabled={!collapsed}>
+      <div className="tip-wrap"> {link} </div>
+    </Mantine.Tooltip>
+  }
+}
+
 // The flat lists as a single unlabelled section, unless sections were given.
 let sectionsOr = (sections: option<array<section>>, items: array<navItem>, key) =>
   switch sections {
@@ -234,6 +277,8 @@ let make = (
   // grouped alternatives to `nav` / `bottom`; when given, they replace them
   ~sections: option<array<section>>=?,
   ~bottomSections: option<array<section>>=?,
+  // a compact link to the right of the theme switcher (below it while collapsed)
+  ~footerItem: option<navItem>=?,
   ~children,
 ) => {
   let top = sectionsOr(sections, nav, "nav")
@@ -308,7 +353,13 @@ let make = (
       </nav>
       <div className="side-bottom">
         <SideSections sections=foot active collapsed />
-        <ThemeToggle collapsed />
+        <div className="side-footer">
+          <ThemeToggle collapsed />
+          {switch footerItem {
+          | Some(it) => <FooterLink item=it active={active == it.key} collapsed />
+          | None => React.null
+          }}
+        </div>
       </div>
       <button
         className="edge-toggle"
@@ -368,7 +419,14 @@ let make = (
       </nav>
       <div className="mm-bottom">
         <MenuSections sections=foot active onNavigate=closeMenu />
-        <ThemeToggle />
+        <div className="side-footer">
+          <ThemeToggle />
+          {switch footerItem {
+          | Some(it) =>
+            <FooterLink item=it active={active == it.key} collapsed=false onNavigate=closeMenu />
+          | None => React.null
+          }}
+        </div>
       </div>
     </div>
   </div>

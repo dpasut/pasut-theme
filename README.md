@@ -46,6 +46,11 @@ let sections = [
 </Shell>
 ```
 
+`footerItem` puts one compact link (icon and label, plus its `trailing` element
+if there's room) to the right of the theme switcher, e.g.
+`footerItem=Shell.item(~key="updates", ~to_="/updates", ~icon=Icons.sparkles, ~label="Changes", ())`.
+Collapsed, it's an icon under the switcher; the phone menu shows it beside the switcher.
+
 `sections` / `bottomSections` replace `nav` / `bottom` when given; sites using
 the flat lists are unaffected. The phone menu shows the same sections.
 
