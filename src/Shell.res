@@ -21,18 +21,28 @@ let item = (~key, ~to_, ~icon, ~label, ~isExternal=false, ~newTab=false, ~traili
   trailing,
 }
 
-let lsGet: string => Js.Nullable.t<string> = %raw(`k => {
-  try { return window.localStorage.getItem(k); } catch (e) { return null; }
-}`)
-let lsSet: (string, string) => unit = %raw(`(k, v) => {
-  try { window.localStorage.setItem(k, v); } catch (e) {}
-}`)
+@val @scope(("window", "localStorage"))
+external storageGet: string => Js.Nullable.t<string> = "getItem"
+@val @scope(("window", "localStorage"))
+external storageSet: (string, string) => unit = "setItem"
 
-let clientX: Dom.event => float = %raw(`e => e.clientX`)
-let addWinListener: (string, Dom.event => unit) => unit = %raw(`(t, f) =>
-  window.addEventListener(t, f)`)
-let removeWinListener: (string, Dom.event => unit) => unit = %raw(`(t, f) =>
-  window.removeEventListener(t, f)`)
+// localStorage can throw (privacy modes); treat failures as absent/no-op.
+let lsGet = k =>
+  try storageGet(k) catch {
+  | _ => Js.Nullable.null
+  }
+let lsSet = (k, v) =>
+  try storageSet(k, v) catch {
+  | _ => ()
+  }
+
+@get external clientX: Dom.event => float = "clientX"
+
+@val @scope("window")
+external addWinListener: (string, Dom.event => unit) => unit = "addEventListener"
+@val @scope("window")
+external removeWinListener: (string, Dom.event => unit) => unit =
+  "removeEventListener"
 
 let minWidth = 180.
 let maxWidth = 400.
@@ -197,9 +207,9 @@ let make = (
       !c
     })
 
-  let sidebarStyle = collapsed
-    ? ReactDOM.Style.make(~width="64px", ())
-    : ReactDOM.Style.make(~width=Belt.Float.toString(width) ++ "px", ())
+  let sidebarStyle: JsxDOMStyle.t = collapsed
+    ? {width: "64px"}
+    : {width: Belt.Float.toString(width) ++ "px"}
 
   <div className="shell">
     <aside

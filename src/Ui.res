@@ -1,6 +1,8 @@
 // Small shared UI pieces.
 
-let scrollTop: unit => unit = %raw(`() => window.scrollTo(0, 0)`)
+@val @scope("window") external windowScrollTo: (int, int) => unit = "scrollTo"
+
+let scrollTop = () => windowScrollTo(0, 0)
 
 module Link = {
   @react.component

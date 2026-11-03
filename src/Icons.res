@@ -21,7 +21,7 @@ module Icon = {
   let make = (~d: string, ~className: string="") =>
     <span
       className
-      style={ReactDOM.Style.make(~display="inline-flex", ~alignItems="center", ())}
+      style={{display: "inline-flex", alignItems: "center"}}
       dangerouslySetInnerHTML={{"__html": d}}
     />
 }
