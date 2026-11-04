@@ -75,6 +75,11 @@ let lsSet = (k, v) =>
   }
 
 @get external clientX: Dom.event => float = "clientX"
+@get external key: Dom.event => string = "key"
+type focusOptions = {preventScroll: bool}
+@send external focusWith: (Dom.element, focusOptions) => unit = "focus"
+let focusRef = (r: React.ref<Js.Nullable.t<Dom.element>>) =>
+  r.current->Js.Nullable.toOption->Belt.Option.forEach(el => el->focusWith({preventScroll: true}))
 
 @val @scope("window")
 external addWinListener: (string, Dom.event => unit) => unit = "addEventListener"
@@ -103,15 +108,18 @@ module SideLink = {
             }}
       </>
     let className = active ? "side-link active" : "side-link"
+    // collapsed, a link is only its icon: the label becomes its name
+    let ariaLabel = collapsed ? Some(item.label) : None
+    let ariaCurrent = active ? Some(#page) : None
     let link = item.disabled
-      ? <span className="side-link disabled" ariaDisabled=true> {inner} </span>
+      ? <span className="side-link disabled" ariaDisabled=true ?ariaLabel> {inner} </span>
       : item.isExternal
       ? item.newTab
-          ? <a href=item.to_ className target="_blank" rel="noopener noreferrer">
+          ? <a href=item.to_ className target="_blank" rel="noopener noreferrer" ?ariaLabel>
               {inner}
             </a>
-          : <a href=item.to_ className> {inner} </a>
-      : <Ui.Link to_=item.to_ className> {inner} </Ui.Link>
+          : <a href=item.to_ className ?ariaLabel> {inner} </a>
+      : <Ui.Link to_=item.to_ className ?ariaLabel ?ariaCurrent> {inner} </Ui.Link>
     // Tooltip needs a ref-forwarding child; a plain div qualifies.
     <Mantine.Tooltip
       label=item.label position="right" withArrow=true disabled={!collapsed}>
@@ -147,6 +155,7 @@ module MenuItem = {
       : <a
           href=item.to_
           className
+          ariaCurrent=?{active ? Some(#page) : None}
           onClick={e => {
             ReactEvent.Mouse.preventDefault(e)
             RescriptReactRouter.push(item.to_)
@@ -347,8 +356,9 @@ module AccountMenu = {
         className={"account-head" ++ (open_ ? " open" : "") ++ (inside && !open_ ? " has-active" : "")}
         onClick=toggle
         ariaExpanded=open_
-        ariaLabel={account.name ++ (open_ ? ": close menu" : ": open menu")}>
-        <span className="account-avatar"> {React.string(initials(account.name))} </span>
+        // its name is the visible one; collapsed, only the initials show, so it's given the name
+        ariaLabel=?{collapsed ? Some(account.name ++ ", account menu") : None}>
+        <span className="account-avatar" ariaHidden=true> {React.string(initials(account.name))} </span>
         {collapsed
           ? React.null
           : <>
@@ -356,7 +366,11 @@ module AccountMenu = {
               <Icons.Icon d={open_ ? Icons.chevronDown : Icons.chevronUp} className="account-chevron" />
             </>}
       </button>
+    // the button comes first (so Tab goes from it into the menu); CSS shows the menu above it
     <div className="account">
+      <Mantine.Tooltip label=account.name position="right" withArrow=true disabled={!collapsed}>
+        <div className="tip-wrap"> {head} </div>
+      </Mantine.Tooltip>
       {open_
         ? <div className="account-items">
             {account.items->Js.Array2.map(row)->React.array}
@@ -364,9 +378,6 @@ module AccountMenu = {
             {account.endItems->Js.Array2.map(row)->React.array}
           </div>
         : React.null}
-      <Mantine.Tooltip label=account.name position="right" withArrow=true disabled={!collapsed}>
-        <div className="tip-wrap"> {head} </div>
-      </Mantine.Tooltip>
     </div>
   }
 }
@@ -404,6 +415,41 @@ let make = (
   let dragging = React.useRef(false)
   let (menuOpen, setMenuOpen) = React.useState(() => false)
   let closeMenu = () => setMenuOpen(_ => false)
+  let main = React.useRef(Js.Nullable.null)
+  let burger = React.useRef(Js.Nullable.null)
+  let menuClose = React.useRef(Js.Nullable.null)
+
+  // a new page: keyboard and screen-reader focus moves to it (not on the first load)
+  let firstPage = React.useRef(true)
+  React.useEffect1(() => {
+    if firstPage.current {
+      firstPage.current = false
+    } else {
+      focusRef(main)
+    }
+    None
+  }, [active])
+
+  // the mobile menu is a dialog: focus goes into it, Escape closes it, and focus returns to the burger
+  let menuWasOpen = React.useRef(false)
+  React.useEffect1(() => {
+    if menuOpen {
+      focusRef(menuClose)
+      let onKey = e =>
+        if key(e) == "Escape" {
+          setMenuOpen(_ => false)
+        }
+      addWinListener("keydown", onKey)
+      menuWasOpen.current = true
+      Some(() => removeWinListener("keydown", onKey))
+    } else {
+      if menuWasOpen.current {
+        menuWasOpen.current = false
+        focusRef(burger)
+      }
+      None
+    }
+  }, [menuOpen])
 
   React.useEffect0(() => {
     let onMove = e =>
@@ -439,6 +485,7 @@ let make = (
     : {width: Belt.Float.toString(width) ++ "px"}
 
   <div className="shell">
+    <a className="skip-link" href="#main"> {React.string("Skip to content")} </a>
     <aside
       className={collapsed ? "sidebar collapsed" : "sidebar"} style=sidebarStyle>
       <Ui.Link to_="/" className="brand">
@@ -508,20 +555,27 @@ let make = (
         </Ui.Link>
         <button
           className="mh-burger"
+          ref={ReactDOM.Ref.domRef(burger)}
           onClick={_ => setMenuOpen(_ => true)}
+          ariaExpanded=menuOpen
           ariaLabel="Open menu">
           <Icons.Icon d=Icons.menu />
         </button>
       </header>
       <Mantine.Container size="xl" px="md">
-        <div className="page"> {children} </div>
+        <main className="page" id="main" tabIndex={-1} ref={ReactDOM.Ref.domRef(main)}> {children} </main>
       </Mantine.Container>
     </div>
-    <div className={menuOpen ? "mobile-menu open" : "mobile-menu"}>
+    <div
+      className={menuOpen ? "mobile-menu open" : "mobile-menu"}
+      role="dialog"
+      ariaModal=true
+      ariaLabel="Menu">
       <div className="mm-head">
         <span className="brand"> {React.string(brand)} </span>
         <button
           className="mh-burger"
+          ref={ReactDOM.Ref.domRef(menuClose)}
           onClick={_ => setMenuOpen(_ => false)}
           ariaLabel="Close menu">
           <Icons.Icon d=Icons.close />

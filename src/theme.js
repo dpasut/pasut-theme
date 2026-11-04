@@ -40,4 +40,9 @@ export const theme = createTheme({
     ],
   },
   defaultRadius: "md",
+  // icon-only close buttons get a name screen readers can say
+  components: {
+    Modal: { defaultProps: { closeButtonProps: { "aria-label": "Close" } } },
+    Drawer: { defaultProps: { closeButtonProps: { "aria-label": "Close" } } },
+  },
 });

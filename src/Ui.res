@@ -6,7 +6,14 @@ let scrollTop = () => windowScrollTo(0, 0)
 
 module Link = {
   @react.component
-  let make = (~to_: string, ~className: string="", ~children) => {
+  let make = (
+    ~to_: string,
+    ~className: string="",
+    // the link's name when it shows no text (an icon only), and "page" on the link to the current page
+    ~ariaLabel: option<string>=?,
+    ~ariaCurrent: option<[#date | #"false" | #location | #page | #step | #time | #"true"]>=?,
+    ~children,
+  ) => {
     let onClick = e => {
       // allow cmd/ctrl-click to open in a new tab
       if (
@@ -19,7 +26,7 @@ module Link = {
         scrollTop()
       }
     }
-    <a href=to_ className onClick> {children} </a>
+    <a href=to_ className onClick ?ariaLabel ?ariaCurrent> {children} </a>
   }
 }
 

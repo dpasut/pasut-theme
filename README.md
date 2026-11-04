@@ -63,6 +63,16 @@ soon).
 `sections` / `bottomSections` replace `nav` / `bottom` when given; sites using
 the flat lists are unaffected. The phone menu shows the same sections.
 
+Keyboard and screen readers: the page content is a `<main id="main">` landmark with a "Skip to content" link
+before everything else; moving to another page puts focus on it. The current page's link has
+`aria-current="page"`, collapsed links are named by their labels, and the account button is named by its visible
+name (it comes before its menu, so Tab goes into the menu). The phone menu is a dialog: focus goes into it,
+Escape closes it, and focus goes back to the menu button. Shell controls get a focus ring when reached by keyboard.
+`Ui.Link` takes `~ariaLabel` and `~ariaCurrent`.
+
+Readable text: in light mode, Mantine's description/hint grey uses the theme's `--dimmed`, and red text (subtle
+and light buttons) a darker red, so both pass WCAG AA (4.5:1). Modal and drawer close buttons are named "Close".
+
 ### Installed web apps
 
 The shell keeps clear of the notch and home indicator when a site is drawn edge

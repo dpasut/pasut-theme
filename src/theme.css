@@ -269,6 +269,46 @@ body {
   padding: 24px 0 96px;
 }
 
+/* readable text (WCAG AA, 4.5:1) where Mantine's defaults fall short in light mode: hint and description text
+   uses the theme's grey, and red text (subtle and light buttons, e.g. Delete) a darker red */
+html:root[data-mantine-color-scheme="light"] {
+  --mantine-color-dimmed: var(--dimmed);
+  --mantine-color-red-light-color: var(--mantine-color-red-9);
+}
+
+/* the page's content: focused (for screen readers) after moving to a new page, without a ring */
+.page:focus {
+  outline: none;
+}
+
+/* "Skip to content": the first thing a keyboard reaches; shown only while it has focus */
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: -100px;
+  z-index: 1000;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* a clear ring on the shell's own controls when reached by keyboard */
+.brand:focus-visible,
+.side-link:focus-visible,
+.mm-item:focus-visible,
+.account-head:focus-visible,
+.mh-burger:focus-visible,
+.skip-link:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
 /* ---- Mobile: hide sidebar, show top bar + full-screen menu ---- */
 .mobile-menu,
 .mh-burger {
@@ -518,7 +558,7 @@ a.chip:hover {
 /* The account menu at the foot of the sidebar: "<avatar> <name>", opening upwards. */
 .account {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* the menu (after the button in the page) shows above it */
   gap: 4px;
   border-top: 1px solid var(--border);
   padding-top: 8px;
